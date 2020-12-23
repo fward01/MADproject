@@ -94,25 +94,18 @@ public class MainActivity extends AppCompatActivity {
             case 1:
                 flashButton(bBlue);
                 gameSequence[arrayIndex++] = BLUE;
-
                 break;
             case 2:
                 flashButton(bRed);
                 gameSequence[arrayIndex++] = RED;
-
-
                 break;
             case 3:
                 flashButton(bYellow);
                 gameSequence[arrayIndex++] = YELLOW;
-
-
                 break;
             case 4:
                 flashButton(bGreen);
                 gameSequence[arrayIndex++] = GREEN;
-
-
                 break;
             default:
                 break;

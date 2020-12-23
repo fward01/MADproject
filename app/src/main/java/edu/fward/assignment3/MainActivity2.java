@@ -2,6 +2,8 @@ package edu.fward.assignment3;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.usage.UsageEvents;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -20,33 +22,37 @@ import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MainActivity2 extends AppCompatActivity implements SensorEventListener{
+public class MainActivity2 extends AppCompatActivity  {
 
     private final int BLUE = 1;
     private final int RED = 2;
     private final int YELLOW = 3;
     private final int GREEN = 4;
-
+    private final double NORTH_MOVE_FORWARD = 2.5;     // upper mag limit
+    private final double NORTH_MOVE_BACKWARD = -2.5;      // lower mag limit
+    private final double WEST_MOVE_FORWARD = 2.5;     // upper mag limit
+    private final double WEST_MOVE_BACKWARD = -2.5;      // lower mag limit
+    boolean highLimit = false;      // detect high limit
     Button bRed, bBlue, bYellow, bGreen, fb;
-    int sequenceCount = 4, n = 0;
     int[] gameSequence;
     int[] playerSequence = new int[120];
     int arrayIndex = 0;
     public int score=0;
-
+    boolean redPress=false;
+    private SensorManager sensorManager;
 
     CountDownTimer ct = new CountDownTimer(15000,  1500) {
 
         public void onTick(long millisUntilFinished) {
-            TextView mTextField=findViewById(R.id.mTextField);
-            bRed.setOnClickListener(new View.OnClickListener() {
+                 {
+                    bRed.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
 
-                public void onClick(View v) {
-
-                    playerSequence[arrayIndex++] = RED;
+                            playerSequence[arrayIndex++] = RED;
+                        }
+                    });
 
                 }
-            });
             bBlue.setOnClickListener(new View.OnClickListener() {
 
                 public void onClick(View v) {
@@ -117,6 +123,11 @@ public class MainActivity2 extends AppCompatActivity implements SensorEventListe
         gameSequence= (int[]) myBundle.get("gameSequence");
         Log.d("game sequence", String.valueOf(gameSequence));
         score= (int) myBundle.get("Score");
+        sensorManager= (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Sensor sensor=sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(accelSensorListener, sensor,
+                SensorManager.SENSOR_DELAY_NORMAL);
+
         ct.start();
     }
 
@@ -146,13 +157,82 @@ public class MainActivity2 extends AppCompatActivity implements SensorEventListe
         };
         handler.postDelayed(r, 600);
     }
+    private SensorEventListener accelSensorListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+            // Can we get a north movement
+            // you need to do your own mag calculating
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
+            if ((x > NORTH_MOVE_FORWARD) && (highLimit == false)) {
+                highLimit = true;
+                bGreen.performClick();
+                bGreen.setPressed(true);
+                bGreen.invalidate();
+                bGreen.postDelayed(new Runnable() {  //delay button
+                    public void run() {
+                        bGreen.setPressed(false);
+                        bGreen.invalidate();
+                        //any other associated action
+                    }
+                }, 800);
+                bGreen.invalidate();
+            }
+            if ((x < NORTH_MOVE_BACKWARD) && (highLimit == true)) {
+                // we have a tilt to the north
+                highLimit = false;
+                bBlue.performClick();
+                bBlue.setPressed(true);
+                bBlue.invalidate();
+                bBlue.postDelayed(new Runnable() {  //delay button
+                    public void run() {
+                        bBlue.setPressed(false);
+                        bBlue.invalidate();
+                        //any other associated action
+                    }
+                }, 800);
+                bBlue.invalidate();
+            }
+            if ((y > WEST_MOVE_FORWARD) && (highLimit == false)) {
+                highLimit = true;
+                bRed.performClick();
+                bRed.setPressed(true);
+                bRed.invalidate();
+                bRed.postDelayed(new Runnable() {  //delay button
+                    public void run() {
+                        bRed.setPressed(false);
+                        bRed.invalidate();
+                        //any other associated action
+                    }
+                }, 800);
+                bRed.invalidate();
+            }
+            if ((y < WEST_MOVE_BACKWARD) && (highLimit == true)) {
+                // we have a tilt to the north
+                highLimit = false;
+                bYellow.performClick();
+                bYellow.setPressed(true);
+                bYellow.invalidate();
+                bYellow.postDelayed(new Runnable() {  //delay button
+                    public void run() {
+                        bYellow.setPressed(false);
+                        bYellow.invalidate();
+                        //any other associated action
+                    }
+                }, 800);
+                bYellow.invalidate();
+            }
+        }
 
-    }
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
-    @Override
+        }
+    };
+
+
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
